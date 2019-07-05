@@ -164,6 +164,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     this.defaultRequestProperties = defaultRequestProperties;
   }
 
+
   /**
    * @param userAgent The User-Agent string that should be used.
    * @param contentTypePredicate An optional {@link Predicate}. If a content type is rejected by the
@@ -275,12 +276,21 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     requestProperties.clear();
   }
 
+  public interface HLSUrlListener{
+
+    public void urlOpened(String url);
+  }
+  private HLSUrlListener hlsUrlListener;
+  public void setHlsUrlListener(HLSUrlListener hlsUrlListener){
+    this.hlsUrlListener=hlsUrlListener;
+  }
   @Override
   public long open(DataSpec dataSpec) throws HttpDataSourceException {
     this.dataSpec = dataSpec;
     this.bytesRead = 0;
     this.bytesSkipped = 0;
     transferInitializing(dataSpec);
+
     try {
       connection = makeConnection(dataSpec);
     } catch (IOException e) {
@@ -290,6 +300,9 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
 
     int responseCode;
     String responseMessage;
+    if(hlsUrlListener!=null) {
+      hlsUrlListener.urlOpened(dataSpec.uri.toString());
+    }
     try {
       responseCode = connection.getResponseCode();
       responseMessage = connection.getResponseMessage();

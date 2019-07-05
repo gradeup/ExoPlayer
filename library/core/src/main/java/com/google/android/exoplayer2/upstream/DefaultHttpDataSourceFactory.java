@@ -28,6 +28,7 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
   private final int connectTimeoutMillis;
   private final int readTimeoutMillis;
   private final boolean allowCrossProtocolRedirects;
+  private DefaultHttpDataSource.HLSUrlListener hlsUrlListener;
 
   /**
    * Constructs a DefaultHttpDataSourceFactory. Sets {@link
@@ -89,16 +90,27 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
    *     to HTTPS and vice versa) are enabled.
    */
   public DefaultHttpDataSourceFactory(
-      String userAgent,
-      @Nullable TransferListener listener,
-      int connectTimeoutMillis,
-      int readTimeoutMillis,
-      boolean allowCrossProtocolRedirects) {
+          String userAgent,
+          @Nullable TransferListener listener,
+          int connectTimeoutMillis,
+          int readTimeoutMillis,
+          boolean allowCrossProtocolRedirects) {
     this.userAgent = Assertions.checkNotEmpty(userAgent);
     this.listener = listener;
     this.connectTimeoutMillis = connectTimeoutMillis;
     this.readTimeoutMillis = readTimeoutMillis;
     this.allowCrossProtocolRedirects = allowCrossProtocolRedirects;
+
+  }
+  public DefaultHttpDataSourceFactory(
+          String userAgent,
+          @Nullable TransferListener listener,
+          int connectTimeoutMillis,
+          int readTimeoutMillis,
+          boolean allowCrossProtocolRedirects,
+          DefaultHttpDataSource.HLSUrlListener hlsUrlListener) {
+    this(userAgent,listener,connectTimeoutMillis,readTimeoutMillis,allowCrossProtocolRedirects);
+    this.hlsUrlListener=hlsUrlListener;
   }
 
   @Override
@@ -114,6 +126,9 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
             defaultRequestProperties);
     if (listener != null) {
       dataSource.addTransferListener(listener);
+    }
+    if(hlsUrlListener!=null) {
+      dataSource.setHlsUrlListener(hlsUrlListener);
     }
     return dataSource;
   }
